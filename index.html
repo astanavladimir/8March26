@@ -259,6 +259,8 @@
             to { opacity: 1; transform: translateY(0); max-height: 500px; }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 </head>
 <body>
 
@@ -615,24 +617,77 @@
     }
 
     // Функция для шеринга с телефона
-    function shareResult() {
-        const resultText = document.getElementById('r-text').innerText;
-        const shareData = {
-            title: 'Квиз: Женщины, изменившие мир',
-            text: `Я прошел(ла) квиз к 8 марта! Мой результат: ${resultText} Пройди и ты:`,
-            url: window.location.href // Ссылка на ваш гитхаб
-        };
+    // Обновленная функция для шеринга КАРТИНКОЙ
+    async function shareResult() {
+        const resultScreen = document.getElementById('result-screen');
+        const buttonsWrapper = document.querySelector('.result-buttons-wrapper');
+        const shareBtn = document.querySelector('.share-btn');
+        
+        // 1. Показываем пользователю, что процесс пошел
+        const originalBtnText = shareBtn.innerText;
+        shareBtn.innerText = "Создаем красивую карточку...";
+        shareBtn.disabled = true;
 
-        // Проверяем, поддерживает ли браузер нативный Web Share API (мобильные устройства)
-        if (navigator.share) {
-            navigator.share(shareData)
-                .then(() => console.log('Успешно поделились'))
-                .catch((error) => console.log('Отмена шеринга', error));
-        } else {
-            // Фолбэк для компьютеров — копируем в буфер обмена
-            navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`)
-                .then(() => alert('Результат скопирован в буфер обмена! Вы можете вставить его в любой чат.'))
-                .catch(err => alert('Не удалось скопировать текст.'));
+        // 2. Временно прячем кнопки, чтобы они не попали на скриншот
+        buttonsWrapper.style.display = 'none';
+        
+        // 3. Делаем блок компактной белой карточкой для фото (убираем лишнюю высоту)
+        const originalBg = resultScreen.style.backgroundColor;
+        const originalHeight = resultScreen.style.height;
+        const originalPadding = resultScreen.style.padding;
+        
+        resultScreen.style.backgroundColor = '#FFFFFF';
+        resultScreen.style.height = 'auto';
+        resultScreen.style.padding = '40px 20px'; // Добавляем красивые поля вокруг текста
+
+        try {
+            // 4. Делаем снимок экрана (в высоком разрешении для ретины)
+            const canvas = await html2canvas(resultScreen, {
+                scale: 2, 
+                useCORS: true // Позволяет захватывать ваши картинки
+            });
+            
+            // 5. Моментально возвращаем интерфейс в нормальное состояние
+            buttonsWrapper.style.display = 'flex';
+            resultScreen.style.backgroundColor = originalBg;
+            resultScreen.style.height = originalHeight;
+            resultScreen.style.padding = originalPadding;
+            shareBtn.innerText = originalBtnText;
+            shareBtn.disabled = false;
+
+            // 6. Конвертируем холст в файл картинки
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], 'my-result.png', { type: 'image/png' });
+                
+                const shareData = {
+                    title: 'Квиз: Женщины, изменившие мир',
+                    // Текст, который прикрепится к картинке в сообщении:
+                    text: 'Мой результат в квизе! Проверь свою интуицию и ты: ' + window.location.href,
+                    files: [file]
+                };
+
+                // 7. Открываем нативное меню "Поделиться" на телефоне
+                if (navigator.canShare && navigator.canShare({ files:[file] })) {
+                    await navigator.share(shareData);
+                } else {
+                    // Фолбэк: если браузер не поддерживает шеринг файлов (например, на ПК), скачиваем картинку
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'result-8-marta.png';
+                    a.click();
+                    alert('Картинка с вашим результатом сохранена на устройство! Вы можете прикрепить её в любой чат.');
+                }
+            }, 'image/png');
+            
+        } catch (error) {
+            console.error('Ошибка при создании картинки:', error);
+            // Если что-то пошло не так — восстанавливаем интерфейс
+            buttonsWrapper.style.display = 'flex';
+            resultScreen.style.height = originalHeight;
+            resultScreen.style.padding = originalPadding;
+            shareBtn.innerText = originalBtnText;
+            shareBtn.disabled = false;
+            alert('Не удалось создать картинку. Попробуйте скопировать ссылку на сайт вручную.');
         }
     }
 </script>

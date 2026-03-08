@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вдохновляющие женщины</title>
+    <style>
+        :root {
+            --primary-red: #C31532;
+            --secondary-gray: #495761;
+            --dark-navy: #003B48;
+            --bg-color: #F7F9FA;
+            --white: #FFFFFF;
+            --success-green: #2E7D32; /* Глубокий зеленый для правильных ответов */
+            --error-grey: #9E9E9E; /* Серый для альтернативных паттернов */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--dark-navy);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--white);
+            box-shadow: 0 4px 20px rgba(0, 59, 72, 0.1);
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary-red); /* Шапка теперь красная */
+            color: var(--white);
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .container {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 250px;
+            background-color: var(--secondary-gray);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 14px;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .image-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .option-btn {
+            background-color: var(--white);
+            border: 2px solid var(--secondary-gray);
+            color: var(--dark-navy);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--dark-navy);
+            background-color: #f0f4f8;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* Цветовые статусы кнопок после ответа */
+        .option-btn.correct-choice {
+            background-color: #e8f5e9;
+            border-color: var(--success-green);
+            color: #1b5e20;
+            opacity: 1;
+        }
+
+        .option-btn.incorrect-choice {
+            background-color: #f5f5f5;
+            border-color: var(--error-grey);
+            color: #616161;
+            opacity: 1;
+        }
+
+        .option-btn.correct-highlight {
+            border-color: var(--success-green);
+            border-width: 2px;
+            box-shadow: 0 0 0 1px var(--success-green);
+            opacity: 1;
+        }
+
+        /* Стили для выезжающего факта */
+        .feedback-box {
+            margin-top: 8px;
+            padding: 15px;
+            border-left: 4px solid var(--primary-red);
+            border-radius: 4px 8px 8px 4px;
+            animation: expandDown 0.3s ease-in-out;
+            overflow: hidden;
+        }
+
+        .feedback-box.feedback-correct {
+            background-color: #e8f5e9;
+            border-left-color: var(--success-green);
+        }
+
+        .feedback-box.feedback-incorrect {
+            background-color: #f5f5f5;
+            border-left-color: var(--error-grey);
+        }
+
+        .feedback-box p {
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            color: var(--dark-navy);
+        }
+
+        .next-btn, .start-btn, .share-btn {
+            background-color: var(--dark-navy);
+            color: var(--white);
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .next-btn:hover, .start-btn:hover, .share-btn:hover {
+            background-color: var(--secondary-gray);
+        }
+
+        .share-btn {
+            background-color: var(--primary-red);
+            margin-bottom: 10px;
+        }
+
+        .share-btn:hover {
+            background-color: #a01027;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: #e0e0e0;
+            width: 100%;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--dark-navy);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        #start-screen, #result-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100%;
+        }
+
+        #result-screen h2 {
+            color: var(--primary-red);
+            margin-bottom: 15px;
+        }
+
+        .result-images {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .result-images .image-placeholder {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .result-buttons-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        @keyframes expandDown {
+            from { opacity: 0; transform: translateY(-10px); max-height: 0; }
+            to { opacity: 1; transform: translateY(0); max-height: 500px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <h1>Женщины, изменившие мир</h1>
+    </header>
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+    <div class="container">
+        <!-- Стартовый экран -->
+        <div id="start-screen">
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/600x400/003B48/FFFFFF?text=Коллаж+великих+женщин" alt="Заставка">
+            </div>
+            <h2 style="margin-bottom: 15px;">Проверьте свою интуицию</h2>
+            <p style="margin-bottom: 25px; color: var(--secondary-gray);">Отвечайте на вопросы о реальных исторических ситуациях. Ваши выборы покажут, с кем из великих женщин у вас больше всего общего.</p>
+            <button class="start-btn" onclick="startQuiz()">Начать</button>
+        </div>
+
+        <!-- Экран вопроса -->
+        <div id="question-screen" class="hidden">
+            <div class="image-placeholder" id="q-image"></div>
+            <div class="question-text" id="q-text">Вопрос</div>
+            <div class="options-grid" id="q-options">
+                <!-- Кнопки и комментарии сгенерируются тут -->
+            </div>
+        </div>
+
+        <!-- Экран результатов -->
+        <div id="result-screen" class="hidden">
+            <div class="result-images" id="r-images"></div>
+            <h2>Ваш результат</h2>
+            <p id="r-text" style="font-size: 1.1rem; margin-bottom: 30px;"></p>
+            
+            <div class="result-buttons-wrapper">
+                <button class="share-btn" onclick="shareResult()">Поделиться результатом</button>
+                <button class="start-btn" onclick="location.reload()">Пройти еще раз</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const heroTraits = {
+        curie: "целеустремленность и академический фокус Марии Кюри",
+        zetkin: "обостренное чувство справедливости и лидерство Клары Цеткин",
+        catherine: "стратегическое мышление и масштаб Екатерины Великой",
+        chanel: "прагматизм и умение находить выгоду Коко Шанель",
+        frida: "невероятная искренность и страсть Фриды Кало",
+        lamarr: "нестандартный интеллект и хитрость Хеди Ламарр",
+        switzer: "железобетонная выносливость и упрямство Кэтрин Швитцер"
+    };
+
+    const heroImages = {
+        curie: "https://via.placeholder.com/150/495761/FFFFFF?text=Кюри",
+        zetkin: "https://via.placeholder.com/150/495761/FFFFFF?text=Цеткин",
+        catherine: "https://via.placeholder.com/150/495761/FFFFFF?text=Екатерина+II",
+        chanel: "https://via.placeholder.com/150/495761/FFFFFF?text=Шанель",
+        frida: "https://via.placeholder.com/150/495761/FFFFFF?text=Кало",
+        lamarr: "https://via.placeholder.com/150/495761/FFFFFF?text=Ламарр",
+        switzer: "https://via.placeholder.com/150/495761/FFFFFF?text=Швитцер"
+    };
+
+    const questionsData =[
+        {
+            text: "В 1911 году пресса узнала о романе вдовы Марии Кюри с женатым коллегой. Нобелевский комитет, испугавшись скандала, попросил её не приезжать за второй премией. Как поступила Мария?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Мария+Кюри",
+            correctHero: "curie",
+            options:[
+                { text: "Сухо ответила, что премия дается за открытия, а не за личную жизнь, и поехала на церемонию.", hero: "curie", feedback: "Верно! Мария Кюри была непреклонна: «Оценка научной работы не должна зависеть от клеветы»." },
+                { text: "Открыто появилась с любовником на публике, решив шокировать лицемеров.", hero: "frida", feedback: "Такая болезненная искренность — в стиле Фриды Кало. Кюри же сухо заявила, что премия дается за факты, и поехала в Стокгольм." },
+                { text: "Задействовала связи, чтобы надавить на редакторов газет и пресечь публикации.", hero: "catherine", feedback: "Это метод Екатерины II. У Кюри не было рычагов власти, она просто отказалась признавать право комитета судить ее жизнь." },
+                { text: "Сделала вид, что согласилась с комитетом, но тайно отправила на церемонию доверенное лицо.", hero: "lamarr", feedback: "Такая хитрость подошла бы Хеди Ламарр. Но Кюри пошла напролом лично." }
+            ]
+        },
+        {
+            text: "Первая мировая война. Госпиталям на фронте катастрофически не хватает рентгеновских аппаратов для поиска пуль в ранах. Какое решение нашла Мария Кюри?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Автомобили+ПМВ",
+            correctHero: "curie",
+            options:[
+                { text: "Убедила богатых покровителей проспонсировать частные медицинские тенты под своим именем.", hero: "chanel", feedback: "Грамотная монетизация связей — стиль Коко Шанель! Но Мария Кюри сама поехала на фронт." },
+                { text: "Организовала медсестер в профсоюз, чтобы потребовать от властей поставок оборудования.", hero: "zetkin", feedback: "Это метод Клары Цеткин! А Мария Кюри решила проблему технически: вмонтировала рентгены в авто." },
+                { text: "Работала по 20 часов в сутки, физически перенося раненых солдат на себе.", hero: "switzer", feedback: "Бескомпромиссная выносливость — это Кэтрин Швитцер. Кюри решала проблему умом: она создала мобильные лаборатории." },
+                { text: "Оборудовала обычные автомобили рентгеновскими аппаратами и сама отправилась на передовую.", hero: "curie", feedback: "Верно! Эти мобильные лаборатории солдаты ласково прозвали «Маленькие Кюри»." }
+            ]
+        },
+        {
+            text: "В 1910 году работницы текстильных фабрик были истощены 12-часовым трудом и не имели прав. Как Клара Цеткин решила объединить их для борьбы?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Забастовка",
+            correctHero: "zetkin",
+            options:[
+                { text: "Предложила учредить единый день для ежегодных массовых забастовок.", hero: "zetkin", feedback: "Верно! Именно так она и придумала 8 марта — как день борьбы за права, а не праздник весны." },
+                { text: "Начала тайно вести переговоры с влиятельными политиками, чтобы изменить законы сверху.", hero: "catherine", feedback: "Это дипломатия Екатерины II. Клара Цеткин не верила элитам, она сделала ставку на массовые протесты." },
+                { text: "Доказала владельцам фабрик на цифрах, что улучшение условий повысит их итоговую прибыль.", hero: "chanel", feedback: "Прагматичный расчет Коко Шанель. Цеткин же организовала массовый бунт трудящихся." },
+                { text: "Опубликовала эмоциональные, жестокие истории о травмах работниц, чтобы шокировать публику.", hero: "frida", feedback: "Искренность и боль — путь Фриды Кало. Цеткин действовала политически, предложив международную забастовку." }
+            ]
+        },
+        {
+            text: "1932 год. Нацисты выиграли выборы. Клара Цеткин, как старейший депутат, по протоколу обязана открыть сессию парламента. Зал полон врагов. Её действия?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Рейхстаг",
+            correctHero: "zetkin",
+            options:[
+                { text: "Вежливо улыбалась оппонентам, а ночью выкрала их внутренние документы.", hero: "lamarr", feedback: "Двойная игра Хеди Ламарр. Но Цеткин вышла на трибуну и открыто прочитала антифашистскую речь." },
+                { text: "Физически вцепилась в трибуну и не уходила, когда охрана попыталась её увести.", hero: "switzer", feedback: "Пробиваться силой — стиль Швитцер. Цеткин сделала это силой слова, пока ее слушали." },
+                { text: "Тихо и монотонно зачитала формальный протокол, отказавшись ввязываться в политику.", hero: "curie", feedback: "Аскетичный нейтралитет Кюри. Но Цеткин использовала шанс, чтобы публично разнести фашизм." },
+                { text: "Произнесла пламенную 40-минутную речь прямо в лицо оппонентам, призывая их свергнуть.", hero: "zetkin", feedback: "Верно! Это было невероятно смело. Вскоре после этого ей пришлось бежать из страны." }
+            ]
+        },
+        {
+            text: "В 1768 году свирепствовала оспа. Появилась экспериментальная прививка, но народ считал её дьявольщиной и бунтовал. Как Екатерина II убедила нацию?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Екатерина+II",
+            correctHero: "catherine",
+            options:[
+                { text: "Заперлась с врачами на месяц, чтобы досконально изучить статистику выживаемости.", hero: "curie", feedback: "Аналитический подход Кюри. Екатерина II решила вопрос личным примером: выписала врача и привилась." },
+                { text: "Сделала прививку себе, рискнув жизнью, чтобы показать пример подданным.", hero: "catherine", feedback: "Верно! Императрица рискнула, и на следующий день вся знать выстроилась в очередь на вакцинацию." },
+                { text: "Публично показала свои собственные шрамы, чтобы снять стигму с заболевших.", hero: "frida", feedback: "Эмоциональная открытость Фриды. Екатерина II решала проблемы масштабно и властно." },
+                { text: "Игнорировала риск заражения и продолжала путешествовать по стране, доказывая стойкость.", hero: "switzer", feedback: "Физическое упорство Швитцер. Но Екатерина рискнула по-другому — проверила препарат на себе." }
+            ]
+        },
+        {
+            text: "Муж Екатерины II оказался слабым правителем, который грозился избавиться от неё и сослать в монастырь. Как она взяла судьбу в свои руки?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Дворец",
+            correctHero: "catherine",
+            options:[
+                { text: "Организовала народное восстание низов против несправедливой монархии.", hero: "zetkin", feedback: "Радикальный путь Цеткин! Екатерина II действовала тоньше: переманила на свою сторону военную элиту." },
+                { text: "Притворялась покорной и слабой женой, тайно готовя пути для отступления.", hero: "lamarr", feedback: "Скрытная манипуляция Ламарр. Екатерина II надела мундир и открыто возглавила военный переворот." },
+                { text: "Развелась с ним и использовала статус, чтобы построить независимую империю влияния.", hero: "chanel", feedback: "Прагматизм Коко Шанель. Но Екатерина хотела абсолютной власти в стране." },
+                { text: "Привлекла на свою сторону военных чинов, совершила переворот и заставила мужа отречься.", hero: "catherine", feedback: "Верно! Екатерина II возглавила солдат и бескровно забрала престол." }
+            ]
+        },
+        {
+            text: "Во время Первой мировой роскошный шелк пропал, а жесткие корсеты мешали женщинам работать. Коко Шанель должна была выпустить коллекцию. Её решение?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Мода+1920х",
+            correctHero: "chanel",
+            options:[
+                { text: "Продолжала носить тесные корсеты, но работала в них вдвое усерднее, игнорируя боль.", hero: "switzer", feedback: "Упорство Швитцер. Шанель решила проблему элегантнее: она просто отказалась от корсетов." },
+                { text: "Разрезала свои корсеты на публике, чтобы показать синяки, которые они оставляют на ребрах.", hero: "frida", feedback: "Радикальный жест в стиле Фриды! Но Коко Шанель подошла к делу как бизнесмен." },
+                { text: "Изучила анатомию дыхания и опубликовала сухой отчет о вреде тесной одежды.", hero: "curie", feedback: "Академический подход Марии Кюри! Шанель же просто скупила дешевую ткань для белья." },
+                { text: "Скупила дешевую ткань «джерси» (для мужских кальсон) и создала костюмы без корсетов.", hero: "chanel", feedback: "Верно! Коко Шанель уничтожила корсеты и подарила женщинам удобство, сколотив на этом состояние." }
+            ]
+        },
+        {
+            text: "В 1921 году Коко Шанель решила выпустить духи. В то время все ароматы пахли понятными моно-цветами — розой или фиалкой. Как она создала легенду?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Флакон",
+            correctHero: "chanel",
+            options:[
+                { text: "Сосредоточилась не на запахе, а запатентовала инновационный механический дозатор.", hero: "lamarr", feedback: "Инженерный фокус Ламарр! Шанель сосредоточилась на аромате, заказав абстрактную смесь." },
+                { text: "Использовала авторитет, чтобы сделать этот аромат дресс-кодом высшего общества.", hero: "catherine", feedback: "Властность Екатерины II. Шанель же взяла рынок самим уникальным продуктом." },
+                { text: "Заявила, что дорогие духи — это пустая трата денег, отвлекающая от важных дел.", hero: "zetkin", feedback: "Клара Цеткин бы не одобрила. А Коко Шанель создала легендарные Chanel No.5." },
+                { text: "Заказала химику синтетическую смесь из 80 ингредиентов, чтобы она «пахла абстрактно, как женщина».", hero: "chanel", feedback: "Верно! Chanel No.5 стал первым в мире абстрактным ароматом, перевернувшим индустрию." }
+            ]
+        },
+        {
+            text: "В 1939 году художники-сюрреалисты в Париже пытаются принять Фриду Кало в свою богемную тусовку. Как она на них реагирует?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Фрида+Кало",
+            correctHero: "frida",
+            options:[
+                { text: "Понимает, что у них есть деньги, и завышает цены на свои работы специально для них.", hero: "chanel", feedback: "Коммерческая хватка Шанель! Фрида Кало презирала расчетливость." },
+                { text: "Мило общается на вечеринках, про себя считая их глупцами.", hero: "lamarr", feedback: "Маскировка Хеди Ламарр. Фрида не умела притворяться и льстить." },
+                { text: "Пытается переспорить каждого из них, чтобы доказать свое превосходство.", hero: "switzer", feedback: "Стиль соревновательной Швитцер. Фрида же взяла их презрением." },
+                { text: "Открыто называет их «интеллектуальными снобами» и отказывается льстить кому-либо.", hero: "frida", feedback: "Верно! Фрида была максимально искренней и не терпела лицемерия парижской богемы." }
+            ]
+        },
+        {
+            text: "1953 год, первая выставка Фриды Кало. Она тяжело больна, врачи категорически запрещают ей вставать с постели. Её действия?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Выставка",
+            correctHero: "frida",
+            options:[
+                { text: "Осталась дома, хладнокровно попросив прислать ей подробный отчет о посетителях.", hero: "curie", feedback: "Разумный фокус Кюри. Но Фрида приказала принести свою кровать прямо в галерею!" },
+                { text: "Отправила своего доверенного человека зачитать торжественную речь от своего имени.", hero: "catherine", feedback: "Умное делегирование Екатерины II. Фрида же не могла пропустить свой триумф." },
+                { text: "Превратила факт болезни в повод для публичной дискуссии о правах инвалидов.", hero: "zetkin", feedback: "Это сделала бы Цеткин. А Фрида устроила личный эпатажный перфоманс." },
+                { text: "Приказала привезти свою кровать прямо в галерею и провела вечер лежа, встречая гостей.", hero: "frida", feedback: "Верно! Быть настоящей для нее было важнее боли. Она прибыла на выставку на скорой помощи." }
+            ]
+        },
+        {
+            text: "Идет Вторая мировая война. Узнав, что радиоуправляемые торпеды легко глушатся врагом, актриса Хеди Ламарр решает помочь. Что она делает?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Хеди+Ламарр",
+            correctHero: "lamarr",
+            options:[
+                { text: "Устраивается в военную лабораторию и проводит там дни и ночи за расчетами.", hero: "curie", feedback: "Аскетизм Кюри. А Ламарр вела светскую жизнь, но в перерывах изобрела «прыгающие частоты»." },
+                { text: "Вызывается добровольцем на тренировки, чтобы лично испытывать оборудование.", hero: "switzer", feedback: "Выносливость Швитцер! Ламарр же действовала нестандартным интеллектом." },
+                { text: "Использует обаяние на светских раутах, чтобы выведать секреты у генералов врага.", hero: "catherine", feedback: "Хитрость Екатерины. Ламарр изобрела систему связи, ставшую основой Wi-Fi!" },
+                { text: "Изучает чертежи дома и придумывает систему «прыгающих частот» на базе механизма пианино.", hero: "lamarr", feedback: "Верно! Звезда Голливуда оформила гениальный патент. Без него у нас бы не было современного Bluetooth." }
+            ]
+        },
+        {
+            text: "Муж Хеди Ламарр — оружейный барон, жестко контролирующий каждый её шаг. Она живет в золотой клетке. Как она выбирается?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Замок",
+            correctHero: "lamarr",
+            options:[
+                { text: "Устраивает грандиозный эмоциональный скандал, громя дом, пока он её не отпускает.", hero: "frida", feedback: "Взрыв эмоций Фриды! Но Ламарр действовала тайно: переоделась в горничную и сбежала." },
+                { text: "Договаривается об отступных, шантажируя мужа тем, что испортит его репутацию в прессе.", hero: "chanel", feedback: "Прагматичный шантаж Шанель! Ламарр сыграла идеальную роль и сбежала в ночи." },
+                { text: "Подговаривает всю прислугу в особняке бастовать, пока ей не дадут свободу.", hero: "zetkin", feedback: "Метод Цеткин. Ламарр спасала себя сама, опираясь на хитрость." },
+                { text: "Подсыпает снотворное своей горничной, переодевается в её форму и тайно сбегает на вокзал.", hero: "lamarr", feedback: "Верно! Хеди Ламарр исполнила свой лучший трюк не в кино, а в реальности." }
+            ]
+        },
+        {
+            text: "В 1967 году Кэтрин Швитцер выбежала на марафон, куда женщин не пускали. На трассе директор гонки попытался силой вытолкать её в кювет. Её реакция?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Кэтрин+Швитцер",
+            correctHero: "switzer",
+            options:[
+                { text: "Сошла с трассы, чтобы на следующий день вывести толпу женщин с плакатами к его офису.", hero: "zetkin", feedback: "Активизм Цеткин. Но Швитцер понимала: если остановится, все решат, что женщины физически слабы." },
+                { text: "Позволила выгнать себя, но тут же продала эксклюзивное интервью прессе с выгодой для себя.", hero: "chanel", feedback: "Умение найти выгоду во всем — Шанель. Кэтрин же просто стиснула зубы и побежала дальше." },
+                { text: "Перестала спорить, ушла в библиотеку и подготовила медицинский отчет о выносливости женщин.", hero: "curie", feedback: "Опора на науку — Кюри. А Швитцер отбилась от директора и довела дело до конца ногами." },
+                { text: "Физически отбилась от него, стиснула зубы и молча продолжила бежать до самого финиша.", hero: "switzer", feedback: "Верно! Фотографии ее борьбы облетели мир и навсегда доказали, что женщину не сломить." }
+            ]
+        },
+        {
+            text: "В 1970-х Олимпийский комитет отказывался делать женский марафон олимпийским видом. Как Кэтрин Швитцер заставила их передумать?",
+            img: "https://via.placeholder.com/600x300/495761/FFFFFF?text=Фото:+Марафон",
+            correctHero: "switzer",
+            options:[
+                { text: "Встречалась с чиновниками комитета, очаровывая и убеждая их по одному.", hero: "catherine", feedback: "Подковерные игры Екатерины. Кэтрин пошла в народ: организовала забеги по всему миру." },
+                { text: "Нашла способ тайно слить внутренние лицемерные переписки комитета в газеты.", hero: "lamarr", feedback: "Скрытный слив информации — Ламарр. Кэтрин действовала открыто и масштабно." },
+                { text: "Приковала себя цепями к воротам Олимпийского стадиона в знак протеста.", hero: "frida", feedback: "Радикальный протест Фриды. Кэтрин доказала всё на практике: организовала массовые забеги." },
+                { text: "Организовала глобальную серию пробегов в 27 странах, чтобы доказать огромный массовый спрос.", hero: "switzer", feedback: "Верно! С комитетом было бесполезно спорить словами. Она создала спрос, и в 1984 году марафон стал олимпийским!" }
+            ]
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let scores = { curie: 0, zetkin: 0, catherine: 0, chanel: 0, frida: 0, lamarr: 0, switzer: 0 };
+    let shuffledQuestions =[];
+
+    function shuffleArray(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function startQuiz() {
+        scores = { curie: 0, zetkin: 0, catherine: 0, chanel: 0, frida: 0, lamarr: 0, switzer: 0 };
+        currentQuestionIndex = 0;
+        
+        shuffledQuestions = shuffleArray(questionsData).map(q => ({
+            ...q,
+            options: shuffleArray(q.options)
+        }));
+
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('question-screen').classList.remove('hidden');
+        
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const q = shuffledQuestions[currentQuestionIndex];
+        const progressPercent = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+        document.getElementById('progress').style.width = progressPercent + '%';
+
+        document.getElementById('q-image').innerHTML = `<img src="${q.img}" alt="Иллюстрация">`;
+        document.getElementById('q-text').innerText = `${currentQuestionIndex + 1}. ${q.text}`;
+        
+        const optionsContainer = document.getElementById('q-options');
+        optionsContainer.innerHTML = '';
+        
+        let correctBtnRef = null;
+
+        q.options.forEach((opt) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'option-wrapper';
+
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt.text;
+
+            if (opt.hero === q.correctHero) {
+                correctBtnRef = btn;
+            }
+
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-box hidden';
+            feedbackDiv.innerHTML = `
+                <p>${opt.feedback}</p>
+                <button class="next-btn" onclick="nextQuestion()">Дальше</button>
+            `;
+
+            btn.onclick = () => {
+                // Блокируем кнопки
+                document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+                
+                // Начисляем балл (тому архетипу, который выбран, даже если исторически неверно)
+                scores[opt.hero] += 1;
+                
+                // Применяем цвета в зависимости от исторической правды
+                if (opt.hero === q.correctHero) {
+                    btn.classList.add('correct-choice');
+                    feedbackDiv.classList.add('feedback-correct');
+                } else {
+                    btn.classList.add('incorrect-choice');
+                    feedbackDiv.classList.add('feedback-incorrect');
+                    // Подсвечиваем правильный исторический ответ
+                    if (correctBtnRef) {
+                        correctBtnRef.classList.add('correct-highlight');
+                    }
+                }
+
+                feedbackDiv.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    feedbackDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            };
+
+            wrapper.appendChild(btn);
+            wrapper.appendChild(feedbackDiv);
+            optionsContainer.appendChild(wrapper);
+        });
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < shuffledQuestions.length) {
+            renderQuestion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('progress').style.width = '100%';
+        document.getElementById('question-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        const maxScore = Math.max(...Object.values(scores));
+        const winners = Object.keys(scores).filter(key => scores[key] === maxScore);
+
+        const traits = winners.map(w => heroTraits[w]);
+        let finalText = "";
+        
+        if (winners.length === 1) {
+            finalText = `В вас ярко проявляются ${traits[0]}!`;
+        } else {
+            finalText = `В вас гармонично сочетаются ${traits.join(', а также ')}!`;
+        }
+        
+        document.getElementById('r-text').innerText = finalText;
+
+        const imagesContainer = document.getElementById('r-images');
+        imagesContainer.innerHTML = '';
+        winners.forEach(w => {
+            imagesContainer.innerHTML += `
+                <div class="image-placeholder">
+                    <img src="${heroImages[w]}" alt="Результат">
+                </div>
+            `;
+        });
+    }
+
+    // Функция для шеринга с телефона
+    function shareResult() {
+        const resultText = document.getElementById('r-text').innerText;
+        const shareData = {
+            title: 'Квиз: Женщины, изменившие мир',
+            text: `Я прошел(ла) квиз к 8 марта! Мой результат: ${resultText} Пройди и ты:`,
+            url: window.location.href // Ссылка на ваш гитхаб
+        };
+
+        // Проверяем, поддерживает ли браузер нативный Web Share API (мобильные устройства)
+        if (navigator.share) {
+            navigator.share(shareData)
+                .then(() => console.log('Успешно поделились'))
+                .catch((error) => console.log('Отмена шеринга', error));
+        } else {
+            // Фолбэк для компьютеров — копируем в буфер обмена
+            navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`)
+                .then(() => alert('Результат скопирован в буфер обмена! Вы можете вставить его в любой чат.'))
+                .catch(err => alert('Не удалось скопировать текст.'));
+        }
+    }
+</script>
+
+</body>
+</html>
